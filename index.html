@@ -4,23 +4,72 @@
 <meta charset="UTF-8">
 <title>NYC Weather</title>
 <style>
-  body { font-family: Arial, sans-serif; background:#111827; color:white; padding:20px; }
-  h2 { margin: 0 0 12px; font-size: 26px; }
-  .row { background:#1f2937; border-radius:10px; padding:12px 14px; margin:10px 0; display:flex; align-items:center; justify-content:space-between; }
-  .left { display:flex; align-items:center; gap:12px; }
-  .day { font-weight:700; font-size:18px; }
-  .cond { color:#cbd5e1; font-size:14px; margin-top:2px; }
-  .icon { font-size:28px; width:34px; text-align:center; }
-  .temps { font-size:16px; }
-  .hi { font-weight:700; }
-  .lo { color:#cbd5e1; margin-left:10px; }
-  .updated { color:#94a3b8; font-size:12px; margin-top:12px; }
+  body {
+    font-family: Arial, sans-serif;
+    background:#111827;
+    color:white;
+    padding:20px;
+  }
+
+  h2 {
+    margin:0 0 15px;
+    font-size:26px;
+  }
+
+  .container {
+    display:flex;
+    gap:15px;
+  }
+
+  .card {
+    flex:1;
+    background:#1f2937;
+    border-radius:10px;
+    padding:15px;
+    text-align:center;
+  }
+
+  .day {
+    font-weight:bold;
+    font-size:18px;
+    margin-bottom:5px;
+  }
+
+  .icon {
+    font-size:32px;
+    margin:5px 0;
+  }
+
+  .cond {
+    font-size:14px;
+    color:#cbd5e1;
+    margin-bottom:8px;
+  }
+
+  .temps {
+    font-size:16px;
+  }
+
+  .hi {
+    font-weight:bold;
+  }
+
+  .lo {
+    color:#cbd5e1;
+  }
+
+  .updated {
+    margin-top:15px;
+    font-size:12px;
+    color:#94a3b8;
+  }
 </style>
 </head>
 <body>
-  <h2>NYC 3-Day Forecast</h2>
-  <div id="weather">Loading...</div>
-  <div class="updated" id="updated"></div>
+
+<h2>NYC 3-Day Forecast</h2>
+<div class="container" id="weather">Loading...</div>
+<div class="updated" id="updated"></div>
 
 <script>
 const url =
@@ -31,27 +80,22 @@ const url =
   "&timezone=America/New_York";
 
 function iconFor(code){
-  // Simple, readable icons
   if (code === 0) return "☀️";
   if (code === 1) return "🌤️";
   if (code === 2) return "⛅";
   if (code === 3) return "☁️";
   if ([45,48].includes(code)) return "🌫️";
-  if ([51,53,55,56,57].includes(code)) return "🌦️";
-  if ([61,63,65,66,67,80,81,82].includes(code)) return "🌧️";
-  if ([71,73,75,77,85,86].includes(code)) return "🌨️";
-  if ([95,96,99].includes(code)) return "⛈️";
+  if ([61,63,65,80,81,82].includes(code)) return "🌧️";
+  if ([71,73,75].includes(code)) return "🌨️";
+  if ([95].includes(code)) return "⛈️";
   return "🌡️";
 }
 
 function descFor(code){
   const map = {
-    0:"Sunny", 1:"Mostly sunny", 2:"Partly cloudy", 3:"Cloudy",
-    45:"Fog", 48:"Fog",
-    51:"Light drizzle", 53:"Drizzle", 55:"Heavy drizzle",
-    61:"Light rain", 63:"Rain", 65:"Heavy rain",
-    71:"Light snow", 73:"Snow", 75:"Heavy snow",
-    80:"Rain showers", 81:"Showers", 82:"Heavy showers",
+    0:"Sunny", 1:"Mostly Sunny", 2:"Partly Cloudy", 3:"Cloudy",
+    61:"Rain", 63:"Rain", 65:"Heavy Rain",
+    71:"Snow", 73:"Snow", 75:"Heavy Snow",
     95:"Thunderstorm"
   };
   return map[code] || "Mixed";
@@ -61,45 +105,36 @@ async function loadWeather(){
   const res = await fetch(url);
   const data = await res.json();
 
-  const times = data.daily.time;
-  const maxT  = data.daily.temperature_2m_max;
-  const minT  = data.daily.temperature_2m_min;
-  const codes = data.daily.weathercode;
-
   const container = document.getElementById("weather");
   container.innerHTML = "";
 
-  // Show 3 days: today + next 2
   for (let i=0; i<3; i++){
-    const d = new Date(times[i] + "T00:00:00");
-    const dayName = d.toLocaleDateString("en-US", { weekday:"long" });
-    const hi = Math.round(maxT[i]);
-    const lo = Math.round(minT[i]);
-    const code = codes[i];
+    const d = new Date(data.daily.time[i] + "T00:00:00");
+    const dayName = d.toLocaleDateString("en-US", { weekday:"short" });
+    const hi = Math.round(data.daily.temperature_2m_max[i]);
+    const lo = Math.round(data.daily.temperature_2m_min[i]);
+    const code = data.daily.weathercode[i];
 
     container.innerHTML += `
-      <div class="row">
-        <div class="left">
-          <div class="icon">${iconFor(code)}</div>
-          <div>
-            <div class="day">${dayName}</div>
-            <div class="cond">${descFor(code)}</div>
-          </div>
-        </div>
+      <div class="card">
+        <div class="day">${dayName}</div>
+        <div class="icon">${iconFor(code)}</div>
+        <div class="cond">${descFor(code)}</div>
         <div class="temps">
-          <span class="hi">High ${hi}°F</span>
-          <span class="lo">Low ${lo}°F</span>
+          <div class="hi">${hi}°F</div>
+          <div class="lo">${lo}°F</div>
         </div>
       </div>
     `;
   }
 
   document.getElementById("updated").textContent =
-    "Updated: " + new Date().toLocaleString();
+    "Updated: " + new Date().toLocaleTimeString();
 }
 
 loadWeather();
-setInterval(loadWeather, 60 * 60 * 1000); // refresh hourly
+setInterval(loadWeather, 3600000);
 </script>
+
 </body>
 </html>
