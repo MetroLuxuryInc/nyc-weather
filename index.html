@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<body style="font-family: Arial; background:#111827; color:white; padding:20px;">
+<h2>NYC Weather</h2>
+<div id="weather">Loading...</div>
+
+<script>
+fetch("https://api.open-meteo.com/v1/forecast?latitude=40.7128&longitude=-74.0060&daily=temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&timezone=America/New_York")
+.then(res => res.json())
+.then(data => {
+  const high = Math.round(data.daily.temperature_2m_max[0]);
+  const low = Math.round(data.daily.temperature_2m_min[0]);
+  document.getElementById("weather").innerHTML =
+    "Today – High " + high + "°F Low " + low + "°F";
+});
+</script>
+</body>
+</html>
