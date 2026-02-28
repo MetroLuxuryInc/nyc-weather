@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Metro Luxury</title>
+<style>
+  body{
+    margin:0;
+    background:#ffffff; /* change to dark if you prefer */
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+  }
+
+  img{
+    max-width:80%;
+    height:auto;
+  }
+</style>
+</head>
+<body>
+
+<img src="logo.png" alt="Metro Luxury Logo">
+
+</body>
+</html>
