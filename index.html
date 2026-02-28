@@ -1,18 +1,105 @@
 <!DOCTYPE html>
 <html>
-<body style="font-family: Arial; background:#111827; color:white; padding:20px;">
-<h2>NYC Weather</h2>
-<div id="weather">Loading...</div>
+<head>
+<meta charset="UTF-8">
+<title>NYC Weather</title>
+<style>
+  body { font-family: Arial, sans-serif; background:#111827; color:white; padding:20px; }
+  h2 { margin: 0 0 12px; font-size: 26px; }
+  .row { background:#1f2937; border-radius:10px; padding:12px 14px; margin:10px 0; display:flex; align-items:center; justify-content:space-between; }
+  .left { display:flex; align-items:center; gap:12px; }
+  .day { font-weight:700; font-size:18px; }
+  .cond { color:#cbd5e1; font-size:14px; margin-top:2px; }
+  .icon { font-size:28px; width:34px; text-align:center; }
+  .temps { font-size:16px; }
+  .hi { font-weight:700; }
+  .lo { color:#cbd5e1; margin-left:10px; }
+  .updated { color:#94a3b8; font-size:12px; margin-top:12px; }
+</style>
+</head>
+<body>
+  <h2>NYC 3-Day Forecast</h2>
+  <div id="weather">Loading...</div>
+  <div class="updated" id="updated"></div>
 
 <script>
-fetch("https://api.open-meteo.com/v1/forecast?latitude=40.7128&longitude=-74.0060&daily=temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&timezone=America/New_York")
-.then(res => res.json())
-.then(data => {
-  const high = Math.round(data.daily.temperature_2m_max[0]);
-  const low = Math.round(data.daily.temperature_2m_min[0]);
-  document.getElementById("weather").innerHTML =
-    "Today – High " + high + "°F Low " + low + "°F";
-});
+const url =
+  "https://api.open-meteo.com/v1/forecast" +
+  "?latitude=40.7128&longitude=-74.0060" +
+  "&daily=weathercode,temperature_2m_max,temperature_2m_min" +
+  "&temperature_unit=fahrenheit" +
+  "&timezone=America/New_York";
+
+function iconFor(code){
+  // Simple, readable icons
+  if (code === 0) return "☀️";
+  if (code === 1) return "🌤️";
+  if (code === 2) return "⛅";
+  if (code === 3) return "☁️";
+  if ([45,48].includes(code)) return "🌫️";
+  if ([51,53,55,56,57].includes(code)) return "🌦️";
+  if ([61,63,65,66,67,80,81,82].includes(code)) return "🌧️";
+  if ([71,73,75,77,85,86].includes(code)) return "🌨️";
+  if ([95,96,99].includes(code)) return "⛈️";
+  return "🌡️";
+}
+
+function descFor(code){
+  const map = {
+    0:"Sunny", 1:"Mostly sunny", 2:"Partly cloudy", 3:"Cloudy",
+    45:"Fog", 48:"Fog",
+    51:"Light drizzle", 53:"Drizzle", 55:"Heavy drizzle",
+    61:"Light rain", 63:"Rain", 65:"Heavy rain",
+    71:"Light snow", 73:"Snow", 75:"Heavy snow",
+    80:"Rain showers", 81:"Showers", 82:"Heavy showers",
+    95:"Thunderstorm"
+  };
+  return map[code] || "Mixed";
+}
+
+async function loadWeather(){
+  const res = await fetch(url);
+  const data = await res.json();
+
+  const times = data.daily.time;
+  const maxT  = data.daily.temperature_2m_max;
+  const minT  = data.daily.temperature_2m_min;
+  const codes = data.daily.weathercode;
+
+  const container = document.getElementById("weather");
+  container.innerHTML = "";
+
+  // Show 3 days: today + next 2
+  for (let i=0; i<3; i++){
+    const d = new Date(times[i] + "T00:00:00");
+    const dayName = d.toLocaleDateString("en-US", { weekday:"long" });
+    const hi = Math.round(maxT[i]);
+    const lo = Math.round(minT[i]);
+    const code = codes[i];
+
+    container.innerHTML += `
+      <div class="row">
+        <div class="left">
+          <div class="icon">${iconFor(code)}</div>
+          <div>
+            <div class="day">${dayName}</div>
+            <div class="cond">${descFor(code)}</div>
+          </div>
+        </div>
+        <div class="temps">
+          <span class="hi">High ${hi}°F</span>
+          <span class="lo">Low ${lo}°F</span>
+        </div>
+      </div>
+    `;
+  }
+
+  document.getElementById("updated").textContent =
+    "Updated: " + new Date().toLocaleString();
+}
+
+loadWeather();
+setInterval(loadWeather, 60 * 60 * 1000); // refresh hourly
 </script>
 </body>
 </html>
