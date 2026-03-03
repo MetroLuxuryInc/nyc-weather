@@ -1,112 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>NYC Weather</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background:#111827;
-    color:white;
-    margin:0;
-    padding:15px;
-  }
+  <meta charset="UTF-8">
+  <title>NYC 5-Day Weather Forecast</title>
+  <style>
+    html, body {
+      height: 100vh;        /* full viewport height */
+      width: 100vw;         /* full viewport width */
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #f0f0f0;  /* optional page background */
+      overflow: hidden;
+    }
 
-  h2 {
-    margin:0 0 10px;
-    font-size:22px;
-    text-align:center;
-  }
-
-  .container {
-    display:flex;
-    justify-content:space-between;
-    gap:10px;
-  }
-
-  .card {
-    flex:1;
-    background:#1f2937;
-    border-radius:8px;
-    padding:10px;
-    text-align:center;
-    min-width:0; /* prevents overflow issues */
-  }
-
-  .day {
-    font-weight:bold;
-    font-size:16px;
-  }
-
-  .icon {
-    font-size:26px;
-    margin:4px 0;
-  }
-
-  .temps {
-    font-size:14px;
-  }
-
-  .hi {
-    font-weight:bold;
-  }
-
-  .lo {
-    color:#cbd5e1;
-  }
-</style>
+    .weatherwidget-io {
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: 100vw;
+      max-height: 100vh;
+      box-sizing: border-box;
+    }
+  </style>
 </head>
 <body>
 
-<h2>NYC 3-Day Forecast</h2>
-<div class="container" id="weather"></div>
+  <!-- WeatherWidget.io embed -->
+  <a class="weatherwidget-io" 
+     href="https://forecast.weatherwidget.io/New%20York%2C%20NY" 
+     data-days="5" 
+     data-theme="original">
+     New York, NY Weather
+  </a>
 
-<script>
-const url =
-  "https://api.open-meteo.com/v1/forecast" +
-  "?latitude=40.7128&longitude=-74.0060" +
-  "&daily=weathercode,temperature_2m_max,temperature_2m_min" +
-  "&temperature_unit=fahrenheit" +
-  "&timezone=America/New_York";
-
-function iconFor(code){
-  if (code === 0) return "☀️";
-  if (code <= 2) return "⛅";
-  if (code === 3) return "☁️";
-  if (code >= 61 && code <= 67) return "🌧️";
-  if (code >= 71 && code <= 77) return "🌨️";
-  if (code >= 95) return "⛈️";
-  return "🌤️";
-}
-
-async function loadWeather(){
-  const res = await fetch(url);
-  const data = await res.json();
-  const container = document.getElementById("weather");
-  container.innerHTML = "";
-
-  for (let i = 0; i < 3; i++) {
-    const d = new Date(data.daily.time[i] + "T00:00:00");
-    const dayName = d.toLocaleDateString("en-US", { weekday:"short" });
-    const hi = Math.round(data.daily.temperature_2m_max[i]);
-    const lo = Math.round(data.daily.temperature_2m_min[i]);
-    const code = data.daily.weathercode[i];
-
-    container.innerHTML += `
-      <div class="card">
-        <div class="day">${dayName}</div>
-        <div class="icon">${iconFor(code)}</div>
-        <div class="temps">
-          <div class="hi">${hi}°F</div>
-          <div class="lo">${lo}°F</div>
-        </div>
-      </div>
-    `;
-  }
-}
-
-loadWeather();
-</script>
+  <script>
+    !function(d,s,id){
+      var js,fjs=d.getElementsByTagName(s)[0];
+      if(!d.getElementById(id)){
+        js=d.createElement(s);
+        js.id=id;
+        js.src='https://weatherwidget.io/js/widget.min.js';
+        fjs.parentNode.insertBefore(js,fjs);
+      }
+    }(document,'script','weatherwidget-io-js');
+  </script>
 
 </body>
 </html>
