@@ -2,29 +2,103 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>NYC Weather Map</title>
+  <title>NYC 5‑Day Weather Forecast (°F)</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       height: 100vh;
       width: 100vw;
-      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      font-family: Arial, sans-serif;
+      background: #eef2f3;
+      color: #222;
     }
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
+    header {
+      text-align: center;
+      padding: 20px;
+      font-size: 2em;
+      background: #336699;
+      color: #fff;
+    }
+    #forecast {
+      flex: 1;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-evenly;
+      align-items: center;
+      padding: 10px;
+      flex-wrap: wrap; /* makes it wrap on smaller screens */
+    }
+    .day {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      width: 18%;
+      min-width: 150px;
+      text-align: center;
+      padding: 10px;
+      margin: 10px 0;
+    }
+    .day img {
+      width: 60px;
+      height: 60px;
+    }
+    .temp {
+      font-size: 1.2em;
+      margin: 6px 0;
     }
   </style>
 </head>
 <body>
 
-  <!-- OpenWeatherMap Interactive NYC Map -->
-  <iframe 
-    src="https://openweathermap.org/weathermap?basemap=map&cities=true&layer=temperature&lat=40.7128&lon=-74.0060&zoom=11" 
-    title="NYC Weather Map">
-  </iframe>
+  <header>New York City 5‑Day Forecast (°F)</header>
+  <div id="forecast"></div>
+
+<script>
+const apiKey = "0ebfc79111736c9bc833645cdffbe285"; // Your API key
+const city = "New York,US";
+
+fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=imperial&appid=${apiKey}`)
+  .then(res => res.json())
+  .then(data => {
+    const daily = {};
+    data.list.forEach(item => {
+      const date = item.dt_txt.split(" ")[0];
+      if (!daily[date]) daily[date] = [];
+      daily[date].push(item);
+    });
+
+    const container = document.getElementById("forecast");
+    Object.keys(daily).slice(0,5).forEach(date => {
+      const dayList = daily[date];
+      // pick midday reading (~12:00) if available
+      const midday = dayList.find(i => i.dt_txt.includes("12:00:00")) || dayList[0];
+
+      const icon = midday.weather[0].icon;
+      const desc = midday.weather[0].description;
+
+      const high = Math.max(...dayList.map(i => i.main.temp_max)).toFixed(1);
+      const low  = Math.min(...dayList.map(i => i.main.temp_min)).toFixed(1);
+
+      const div = document.createElement("div");
+      div.className = "day";
+      div.innerHTML = `
+        <div><strong>${new Date(date).toLocaleDateString("en-US", {weekday:'short', month:'short', day:'numeric'})}</strong></div>
+        <img src="https://openweathermap.org/img/wn/${icon}@2x.png" alt="${desc}">
+        <div class="temp">High: ${high}°F</div>
+        <div class="temp">Low: ${low}°F</div>
+        <div>${desc}</div>
+      `;
+      container.appendChild(div);
+    });
+  })
+  .catch(err => {
+    document.getElementById("forecast").innerHTML = "<p>Error loading weather</p>";
+    console.error(err);
+  });
+</script>
 
 </body>
 </html>
