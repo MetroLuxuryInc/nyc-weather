@@ -5,35 +5,36 @@
   <title>NYC 5-Day Weather Forecast</title>
   <style>
     html, body {
-      height: 100vh;        /* full viewport height */
-      width: 100vw;         /* full viewport width */
+      height: 100%;
       margin: 0;
-      padding: 0;
       display: flex;
       justify-content: center;
       align-items: center;
-      background: #f0f0f0;  /* optional page background */
-      overflow: hidden;
+      background: #f0f0f0;
+    }
+
+    #weather-container {
+      width: 90%;
+      max-width: 1200px;
+      min-width: 400px;
     }
 
     .weatherwidget-io {
-      width: 100vw !important;
-      height: 100vh !important;
-      max-width: 100vw;
-      max-height: 100vh;
-      box-sizing: border-box;
+      width: 100% !important;
+      height: 600px; /* widget sets own height, can increase for full page */
     }
   </style>
 </head>
 <body>
 
-  <!-- WeatherWidget.io embed -->
-  <a class="weatherwidget-io" 
-     href="https://forecast.weatherwidget.io/New%20York%2C%20NY" 
-     data-days="5" 
-     data-theme="original">
-     New York, NY Weather
-  </a>
+  <div id="weather-container">
+    <a class="weatherwidget-io" 
+       href="https://forecast.weatherwidget.io/New%20York%2C%20NY" 
+       data-days="5" 
+       data-theme="original">
+       New York, NY Weather
+    </a>
+  </div>
 
   <script>
     !function(d,s,id){
